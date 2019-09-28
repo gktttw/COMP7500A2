@@ -101,21 +101,20 @@ public class Recursive {
             } else {
                 if (jobs[k].compatible(jobs[i])) {
                     // no overlap
-                    if (jobs[i].length() + jobs[k].end() - jobs[j].start() + 1
-                            > maxShiftLength) {
+                    if (jobs[i].end() - jobs[j].start() + 1 > maxShiftLength) {
                         // new shift get next valid job
-                        int nextJob = getNextValidJob(jobs, minShiftBreak, i);
+                        int nextJob = getNextJobAfterBreak(jobs, minShiftBreak, k);
                         return getProfit(cost, jobs, j, k) +
                                 maximumProfitRecursive(cost, minShiftBreak,
                                         maxShiftLength, jobs, nextJob,
-                                        nextJob - 1, nextJob - 1);
+                                        jobs.length, jobs.length);
                     } else {
-                        int nextJob = getNextValidJob(jobs, minShiftBreak, i);
+                        int nextJob = getNextJobAfterBreak(jobs, minShiftBreak, k);
                         return Math.max(getProfit(cost, jobs, j, k) +
                                 maximumProfitRecursive(cost,
                                         minShiftBreak, maxShiftLength, jobs,
                                         nextJob,
-                                        nextJob - 1, nextJob - 1),
+                                        jobs.length, jobs.length),
                                 maximumProfitRecursive(cost,
                                 minShiftBreak, maxShiftLength, jobs,
                                 ++i, j, ++k));
@@ -126,6 +125,7 @@ public class Recursive {
                     return  maximumProfitRecursive(cost,
                             minShiftBreak, maxShiftLength, jobs,
                             ++i, j, ++k) - profit;
+                    
                 }
             }
         }
@@ -145,9 +145,9 @@ public class Recursive {
         return profit;
     }
 
-    private static int getNextValidJob(Job[] jobs, int minShiftBreak, int i) {
-        for (int l = i + 1; l < jobs.length; l++) {
-            if (jobs[l].start() >= minShiftBreak + 1) {
+    private static int getNextJobAfterBreak(Job[] jobs, int minShiftBreak, int k) {
+        for (int l = k + 1; l < jobs.length; l++) {
+            if (jobs[l].start() - jobs[k].end() >= minShiftBreak + 1) {
                 return l;
             }
         }
