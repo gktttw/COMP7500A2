@@ -92,40 +92,53 @@ public class Recursive {
             //
             if (j == jobs.length) {
                 // no shift, take the next one or not
-                // dont care about overlap
-                i++;
+                // max(take, don't take)
                 return Math.max(maximumProfitRecursive(cost, minShiftBreak,
-                        maxShiftLength, jobs, i, i - 1, i - 1),
+                        maxShiftLength, jobs, i + 1, i, i),
                         maximumProfitRecursive(cost, minShiftBreak,
-                        maxShiftLength, jobs, i, jobs.length, jobs.length));
+                        maxShiftLength, jobs, i + 1, jobs.length, jobs.length));
             } else {
                 if (jobs[k].compatible(jobs[i])) {
                     // no overlap
                     if (jobs[i].end() - jobs[j].start() + 1 > maxShiftLength) {
-                        // new shift get next valid job
+                        // break shift
                         int nextJob = getNextJobAfterBreak(jobs, minShiftBreak, k);
                         return getProfit(cost, jobs, j, k) +
                                 maximumProfitRecursive(cost, minShiftBreak,
                                         maxShiftLength, jobs, nextJob,
                                         jobs.length, jobs.length);
                     } else {
+                        // max(take, don't take)
                         int nextJob = getNextJobAfterBreak(jobs, minShiftBreak, k);
-                        return Math.max(getProfit(cost, jobs, j, k) +
-                                maximumProfitRecursive(cost,
-                                        minShiftBreak, maxShiftLength, jobs,
-                                        nextJob,
-                                        jobs.length, jobs.length),
-                                maximumProfitRecursive(cost,
+                        int take = maximumProfitRecursive(cost,
                                 minShiftBreak, maxShiftLength, jobs,
-                                ++i, j, ++k));
+                                i + 1, j, k + 1);
+                        int notTake = getProfit(cost, jobs, j, k) +
+                                maximumProfitRecursive(cost, minShiftBreak,
+                                        maxShiftLength, jobs, nextJob,
+                                        jobs.length, jobs.length);
+                        return Math.max(take, notTake);
                     }
                 } else {
                     // overlap
-                    int profit = getProfit(cost, jobs, i, i);
-                    return  maximumProfitRecursive(cost,
-                            minShiftBreak, maxShiftLength, jobs,
-                            ++i, j, ++k) - profit;
-                    
+                    if (jobs[i].end() - jobs[j].start() + 1 > maxShiftLength) {
+                        // break the shift
+                        int nextJob = getNextJobAfterBreak(jobs, minShiftBreak, k);
+                        return getProfit(cost, jobs, j, k) +
+                                maximumProfitRecursive(cost,
+                                minShiftBreak, maxShiftLength, jobs,
+                                        nextJob, jobs.length, jobs.length);
+                    } else {
+                        // ignore
+                        int compromise = 0;
+                        for (int m = jobs[k].end(); m < jobs[i].end(); m++) {
+                            compromise += cost[m + 1];
+                        }
+                        System.out.println(compromise + " - " + jobs[i].payment());
+                        return maximumProfitRecursive(cost,
+                                minShiftBreak, maxShiftLength, jobs,
+                                i +1 , j, k + 1) - jobs[i].payment() + compromise;
+                    }
                 }
             }
         }
@@ -142,12 +155,13 @@ public class Recursive {
         for (int l = jobs[j].start(); l <= jobs[k].end(); l++) {
             profit -= cost[l];
         }
+        System.out.println("("+ j +", " +k+ ") :"+profit);
         return profit;
     }
 
     private static int getNextJobAfterBreak(Job[] jobs, int minShiftBreak, int k) {
         for (int l = k + 1; l < jobs.length; l++) {
-            if (jobs[l].start() - jobs[k].end() >= minShiftBreak + 1) {
+            if (jobs[l].start() - jobs[k].end() - 1 >= minShiftBreak) {
                 return l;
             }
         }
