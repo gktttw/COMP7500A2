@@ -85,6 +85,13 @@ public class Recursive {
             // only allowed to choose from i onwards
             return getProfit(cost, jobs, j, k, i);
         } else {
+            if (jobs[i].end() - jobs[i].start() + 1 > maxShiftLength) {
+                // job duration exceeds maxShiftLength
+                // skip
+                return maximumProfitRecursive(cost,
+                        minShiftBreak, maxShiftLength, jobs,
+                        i + 1 , j, k) - jobs[i].payment();
+            }
             // take i or not based on some logic
             // first check j start and k end if it exceeds maxShiftLength
             // exceeds: cant take more job in this shift, new a shift
