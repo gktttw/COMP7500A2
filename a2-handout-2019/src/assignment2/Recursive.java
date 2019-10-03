@@ -155,6 +155,15 @@ public class Recursive {
         }
     }
 
+    /**
+     * get the partial profit of a series of jobs in a consecutive way.
+     * @param cost cost
+     * @param jobs jobs
+     * @param j from job[j]
+     * @param k to job[k]
+     * @param i just debugging
+     * @return the profit taking job j to k
+     */
     private static int getProfit(int[] cost, Job[] jobs, int j, int k, int i) {
         if (j == jobs.length) {
             return 0;
@@ -170,6 +179,13 @@ public class Recursive {
         return profit;
     }
 
+    /**
+     * get the next valid candidate job after taking minimal shift break
+     * @param jobs jobs
+     * @param minShiftBreak minimal shift break days
+     * @param k the last shift ends with k
+     * @return the most recent job opportunity after taking break
+     */
     private static int getNextJobAfterBreak(Job[] jobs, int minShiftBreak, int k) {
         for (int l = k + 1; l < jobs.length; l++) {
             if (jobs[l].start() - jobs[k].end() -1 >= minShiftBreak) {
