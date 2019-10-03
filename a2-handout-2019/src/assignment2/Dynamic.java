@@ -28,6 +28,16 @@ public class Dynamic {
      */
     public static int maximumProfitDynamic(int[] cost, int minShiftBreak,
             int maxShiftLength, Job[] jobs) {
+        int[][] storage = new int[jobs.length][jobs.length];
+
+        // initialize storage when i == j
+        for (int i = 0; i < jobs.length; i++) {
+            if (jobs[i].length() > maxShiftLength) {
+                storage[i][i] = 0; // can't take this job
+            } else {
+                storage[i][i] = 0;//choose it, it's the only way
+            }
+        }
         return -1; // REMOVE THIS LINE AND IMPLEMENT THIS METHOD
     }
 
