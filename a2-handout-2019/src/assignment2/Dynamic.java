@@ -53,7 +53,7 @@ public class Dynamic {
         // initialize storage when i == j
 
         // TODO: 899 -> 988 999 need init
-        /*
+
         for (int probe = jobs.length - 1; probe >= 0; probe--) {
             // it all start with a new shift
             int notTake = Dynamic.storage[probe + 1][jobs.length][jobs.length];
@@ -69,10 +69,10 @@ public class Dynamic {
 //                    probe, jobs.length, jobs.length);
         }
 
-         */
 
-        maximumProfitRecursive(cost, minShiftBreak, maxShiftLength, jobs, 0,
-                jobs.length, jobs.length);
+
+//        maximumProfitRecursive(cost, minShiftBreak, maxShiftLength, jobs, 0,
+//                jobs.length, jobs.length);
 
         return Dynamic.storage[0][jobs.length][jobs.length];
     }
