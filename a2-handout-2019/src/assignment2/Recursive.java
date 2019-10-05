@@ -88,7 +88,7 @@ public class Recursive {
             for (int jobIndex = k + 1; jobIndex < i ; jobIndex++) {
                 compromise += jobs[jobIndex].payment();
             }
-            return Math.max(getProfit(cost, jobs, j, k, i), 0) + compromise;
+            return Math.max(getProfit(cost, jobs, j, k, i) + compromise, 0) ;
         } else {
             if (jobs[i].end() - jobs[i].start() + 1 > maxShiftLength) {
                 // job duration exceeds maxShiftLength
