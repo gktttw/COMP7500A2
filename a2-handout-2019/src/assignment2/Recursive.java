@@ -93,7 +93,6 @@ public class Recursive {
             if (jobs[i].end() - jobs[i].start() + 1 > maxShiftLength) {
                 // job duration exceeds maxShiftLength
                 // skip
-                System.out.println("" + i + ", " + j + ", " + k);
                 return maximumProfitRecursive(cost,
                         minShiftBreak, maxShiftLength, jobs,
                         i + 1 , j, k) - jobs[i].payment();
@@ -120,7 +119,6 @@ public class Recursive {
                         for (int jobIndex = k + 1; jobIndex < i ; jobIndex++) {
                             compromise += jobs[jobIndex].payment();
                         }
-                        System.out.println("" + i + ", " + j + ", " + k + compromise);
                         return getProfit(cost, jobs, j, k, i) +
                                 maximumProfitRecursive(cost, minShiftBreak,
                                         maxShiftLength, jobs, nextJob,
@@ -134,7 +132,6 @@ public class Recursive {
                         for (int jobIndex = k + 1; jobIndex < i ; jobIndex++) {
                             compromise += jobs[jobIndex].payment();
                         }
-                        System.out.println("" + i + ", " + j + ", " + k + compromise);
                         int newShift = getProfit(cost, jobs, j, k, i) +
                                 maximumProfitRecursive(cost, minShiftBreak,
                                         maxShiftLength, jobs, nextJob,
@@ -165,7 +162,6 @@ public class Recursive {
                         for (int jobIndex = k + 1; jobIndex < i ; jobIndex++) {
                             compromise += jobs[jobIndex].payment();
                         }
-                        System.out.println("" + i + ", " + j + ", " + k +" " +  compromise);
                         int newShift = getProfit(cost, jobs, j, k, i) +
                                 maximumProfitRecursive(cost, minShiftBreak,
                                         maxShiftLength, jobs, nextJob,
@@ -197,7 +193,6 @@ public class Recursive {
         for (int l = jobs[j].start(); l <= jobs[k].end(); l++) {
             profit -= cost[l];
         }
-        //System.out.println(i + "("+ j +", " +k+ ") :"+profit);
         return profit;
     }
 

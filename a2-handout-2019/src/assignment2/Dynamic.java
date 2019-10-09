@@ -1,7 +1,5 @@
 package assignment2;
 
-import java.util.Arrays;
-
 public class Dynamic {
 
     private static int[][][] storage;
@@ -34,65 +32,114 @@ public class Dynamic {
             int maxShiftLength, Job[] jobs) {
         int[][][] storage =
                 new int[jobs.length + 1][jobs.length + 1][jobs.length + 1];
-        for (int[][] square : storage) {
-            for (int[] line : square) {
-                Arrays.fill(line, -1);
+
+        // lowest level
+        storage[jobs.length][jobs.length][jobs.length] = 0;
+        int start = getStartJob(jobs.length, maxShiftLength, jobs);
+        for (int i = start; i < jobs.length; i++) {
+            for (int j = i; j < jobs.length; j++) {
+                int profit = 0;
+                // lowest level cost, last job must be compatible to first
+                // and work you way to the start find compatible ones
+                if (jobs[i].compatible(jobs[j]) || i == j) {
+                    profit += jobs[j].payment();
+                    for (int k = j - 1; k >= i; k--) {
+                        if(jobs[k].compatible(jobs[k+1])) {
+                            profit += jobs[k].payment();
+                        }
+                    }
+                    for (int day = jobs[i].start(); day <= jobs[j].end(); day++) {
+                        profit -= cost[day];
+                    }
+                    storage[jobs.length][i][j] = Math.max(0, profit);
+                }
             }
         }
-
-        storage[jobs.length][jobs.length][jobs.length] = 0;
-
-        for (int i = 0; i < jobs.length; i++) {
-            storage[jobs.length][i][i] =
-                    getProfit(cost,
-                    jobs, i, i, i);
+        for (int i = jobs.length - 1; i > 0; i--) {
+            // work backwards to find the possible start of the shift
+            start = getStartJob(i, maxShiftLength, jobs);
+            for (int j = start; j < i; j++) {
+                for (int k = j; k < i; k++) {
+                    int nextJob = getNextJobAfterBreak(jobs, minShiftBreak, k);
+                    if (jobs[k].end() < jobs[i].start()) {
+                        // no overlap
+                        if (jobs[i].end() - jobs[j].start() + 1 > maxShiftLength) {
+                            // newShift
+                            int compromise = 0;
+                            for (int jobIndex = k + 1; jobIndex < i ; jobIndex++) {
+                                compromise += jobs[jobIndex].payment();
+                            }
+                            storage[i][j][k] = getProfit(cost, jobs, j, k, i) +
+                                    storage[nextJob][jobs.length][jobs.length]
+                                    + compromise;
+                        } else {
+                            // max(take, newShift, skip)
+                            int take = storage[i+1][j][i];
+                            int compromise = 0;
+                            for (int jobIndex = k + 1; jobIndex < i ; jobIndex++) {
+                                compromise += jobs[jobIndex].payment();
+                            }
+                            int newShift = getProfit(cost, jobs, j, k, i) +
+                                    storage[nextJob][jobs.length][jobs.length]
+                                    + compromise;
+                            int skip = storage[i+1][j][k] - jobs[i].payment();
+                            storage[i][j][k] = Math.max(skip, Math.max(take,
+                                    newShift));
+                        }
+                    } else {
+                        // overlap
+                        if (jobs[i].end() - jobs[j].start() + 1 > maxShiftLength) {
+                            // newShift
+                            int compromise = 0;
+                            for (int jobIndex = k + 1; jobIndex < i ; jobIndex++) {
+                                compromise += jobs[jobIndex].payment();
+                            }
+                            storage[i][j][k] = getProfit(cost, jobs, j, k, i) +
+                                    storage[nextJob][jobs.length][jobs.length]
+                                    + compromise;
+                        } else {
+                            // max(skip, newShift)
+                            int skip = storage[i+1][j][k] - jobs[i].payment();
+                            int compromise = 0;
+                            for (int jobIndex = k + 1; jobIndex < i ; jobIndex++) {
+                                compromise += jobs[jobIndex].payment();
+                            }
+                            int newShift = getProfit(cost, jobs, j, k, i) +
+                                    storage[nextJob][jobs.length][jobs.length]
+                                    + compromise;
+                            storage[i][j][k] = Math.max(skip, newShift);
+                        }
+                    }
+                }
+            }
+            storage[i][jobs.length][jobs.length] =
+                    Math.max(storage[i+1][i][i],
+                            storage[i+1][jobs.length][jobs.length]);
         }
-
-        Dynamic.storage = storage;
-
-        // initialize storage when i == j
-
-        // TODO: 899 -> 988 999 need init
-
-        for (int probe = jobs.length - 1; probe >= 0; probe--) {
-            // it all start with a new shift
-            int notTake = Dynamic.storage[probe + 1][jobs.length][jobs.length];
-//            calculateTake(cost, minShiftBreak, maxShiftLength, jobs, probe + 1,
-//                    probe, probe);
-//            int take = Dynamic.storage[probe + 1][probe][probe];
-            int take = maximumProfitRecursive(cost, minShiftBreak,
-                    maxShiftLength, jobs, probe + 1, probe, probe);
-            Dynamic.storage[probe + 1][probe][probe] = take;
-            Dynamic.storage[probe][jobs.length][jobs.length] = Math.max(take,
-                    notTake);
-//            maximumProfitRecursive(cost, minShiftBreak, maxShiftLength, jobs,
-//                    probe, jobs.length, jobs.length);
-        }
-
-
-
-//        maximumProfitRecursive(cost, minShiftBreak, maxShiftLength, jobs, 0,
-//                jobs.length, jobs.length);
-
-        return Dynamic.storage[0][jobs.length][jobs.length];
+//        for (int[][] plane : storage) {
+//            for (int[] line : plane) {
+//                for(int i : line) {
+//                    System.out.print(i + ", ");
+//                }
+//                System.out.println("\n");
+//            }
+//            System.out.println("=====================");
+//        }
+        return Math.max(storage[1][0][0], storage[1][jobs.length][jobs.length]);
     }
 
-    private static void calculateTake(int[] cost, int minShiftBreak,
-                                      int maxShiftLength, Job[] jobs, int i, int j,
-                                      int k) {
-        // see all the possible i j k and update all of them cunt
-        // fill in the gap for taking i j k cuz they are not in storage
-        // build a tree and do level order traversal and update the storage
-        Triplet t = new Triplet(i, j, k);
-        Node n = new Node(t);
-        NaryTree tree = new NaryTree(n);
-        buildTree(cost, minShiftBreak, maxShiftLength, jobs, i, j, k, n);
-    }
-
-    private static void buildTree(int[] cost, int minShiftBreak,
-                                  int maxShiftLength, Job[] jobs, int i, int j,
-                                  int k, Node n) {
-
+    private static int getStartJob(int ithJob, int maxShiftLength, Job[] jobs) {
+        if (ithJob == 0) {
+            return 0;
+        }
+        int count = 0;
+        for (Job j : jobs) {
+            if (jobs[ithJob - 1].end() - j.start() + 1 < maxShiftLength) {
+                return count;
+            }
+            count++;
+        }
+        return -1;
     }
 
     private static int maximumProfitRecursive(int[] cost, int minShiftBreak,
@@ -192,6 +239,29 @@ public class Dynamic {
                 }
             }
         }
+
+//        // new implementation
+//        List<CustomShift> possibleShift = new ArrayList<>();
+//        for (int end = 0; end < jobs.length; end++) {
+//            for (int start = 0; start <= end; start++) {
+//                //System.out.println(start + " : " + end);
+//                if (jobs[end].end() - jobs[start].start() + 1 < maxShiftLength) {
+//                    Shift shift = new Shift(jobs[start].start(), jobs[end].end());
+//                    ArrayList<Job> selectedJobs = new ArrayList<>();
+//                    for (int i = start; i <= end; i++) {
+//                        if (selectedJobs.size() == 0 ||
+//                                selectedJobs.get(selectedJobs.size() - 1).
+//                                        compatible(jobs[i])) {
+//                            selectedJobs.add(jobs[i]);
+//                        }
+//                    }
+//                    possibleShift.add(new CustomShift(shift, selectedJobs));
+//                }
+//            }
+//        }
+//        System.out.println(possibleShift);
+//
+//        return 0;
     }
 
     private static int getProfit(int[] cost, Job[] jobs, int j, int k, int i) {
