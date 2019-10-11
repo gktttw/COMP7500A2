@@ -32,7 +32,7 @@ public class RecursiveTest {
         jobs[3] = new Job(2, 5, 17);
         jobs[4] = new Job(5, 5, 5);
         jobs[5] = new Job(5, 6, 12);
-        jobs[6] = new Job(8, 8, 2);
+        jobs[6] = new Job(8, 8, 12);
         jobs[7] = new Job(11, 12, 5);
         jobs[8] = new Job(11, 12, 6);
 

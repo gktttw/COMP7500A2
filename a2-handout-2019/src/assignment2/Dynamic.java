@@ -55,6 +55,15 @@ public class Dynamic {
             System.out.println(start);
             for (int j = start; j < i; j++) {
                 for (int k = j; k < i; k++) {
+                    // take or not take first
+                    // new shift out of length, dont take it
+                    // in range max(take, not)
+                    storage[i][jobs.length][jobs.length] =
+                            jobs[i].end() - jobs[i].start() + 1 > maxShiftLength ?
+                                    storage[i+1][jobs.length][jobs.length]:
+                                    Math.max(storage[i+1][i][i],
+                                            storage[i+1][jobs.length][jobs.length]);
+
                     int nextJob = getNextJobAfterBreak(jobs, minShiftBreak, k);
                     if (jobs[k].end() < jobs[i].start()) {
                         // no overlap
@@ -107,13 +116,6 @@ public class Dynamic {
                     }
                 }
             }
-            // new shift out of length, dont take it
-            // in range max(take, not)
-            storage[i][jobs.length][jobs.length] =
-                    jobs[i].end() - jobs[i].start() + 1 > maxShiftLength ?
-                            storage[i+1][jobs.length][jobs.length]:
-                    Math.max(storage[i+1][i][i],
-                            storage[i+1][jobs.length][jobs.length]);
         }
         for (int[][] plane : storage) {
             for (int[] line : plane) {
@@ -155,8 +157,7 @@ public class Dynamic {
         return profit;
     }
 
-    private static int getNextJobAfterBreak(Job[] jobs, int minShiftBreak,
-                                          int k) {
+    private static int getNextJobAfterBreak(Job[] jobs, int minShiftBreak, int k) {
         for (int l = k + 1; l < jobs.length; l++) {
             if (jobs[l].start() - jobs[k].end() -1 >= minShiftBreak) {
                 return l;
