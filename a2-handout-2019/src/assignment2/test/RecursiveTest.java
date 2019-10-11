@@ -37,8 +37,10 @@ public class RecursiveTest {
         jobs[8] = new Job(11, 12, 6);
 
         /* compare expected to actual results */
-        int expectedMaxProfit = 21;
+        //int expectedMaxProfit = 21;
         int actualMaxProfit = Recursive.maximumProfitRecursive(cost,
+                minShiftBreak, maxShiftLength, jobs);
+        int expectedMaxProfit = Dynamic.maximumProfitDynamic(cost,
                 minShiftBreak, maxShiftLength, jobs);
         Assert.assertEquals(expectedMaxProfit, actualMaxProfit);
     }

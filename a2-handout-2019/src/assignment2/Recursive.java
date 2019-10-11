@@ -80,7 +80,7 @@ public class Recursive {
      */
     private static int maximumProfitRecursive(int[] cost, int minShiftBreak,
             int maxShiftLength, Job[] jobs, int i, int j, int k) {
-        //System.out.println("" + i + ", " + j + ", " + k);
+        System.out.println("" + i + ", " + j + ", " + k);
         // Base Case
         if (i == jobs.length) {
             // only allowed to choose from i onwards
@@ -90,19 +90,19 @@ public class Recursive {
             }
             return Math.max(getProfit(cost, jobs, j, k, i) + compromise, 0) ;
         } else {
-            if (jobs[i].end() - jobs[i].start() + 1 > maxShiftLength) {
-                // job duration exceeds maxShiftLength
-                // skip
-                return maximumProfitRecursive(cost,
-                        minShiftBreak, maxShiftLength, jobs,
-                        i + 1 , j, k) - jobs[i].payment();
-            }
             // take i or not based on some logic
             // first check j start and k end if it exceeds maxShiftLength
             // exceeds: cant take more job in this shift, new a shift
             // not exceed: take it or not take it
             //
             if (j == jobs.length) {
+                if (jobs[i].end() - jobs[i].start() + 1 > maxShiftLength) {
+                    // job duration exceeds maxShiftLength
+                    // skip
+                    return maximumProfitRecursive(cost,
+                            minShiftBreak, maxShiftLength, jobs,
+                            i + 1 , j, k);
+                }
                 // no shift, take the next one or not
                 // max(take, don't take)
                 return Math.max(maximumProfitRecursive(cost, minShiftBreak,
