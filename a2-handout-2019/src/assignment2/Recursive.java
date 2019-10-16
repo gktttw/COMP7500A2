@@ -80,15 +80,11 @@ public class Recursive {
      */
     private static int maximumProfitRecursive(int[] cost, int minShiftBreak,
             int maxShiftLength, Job[] jobs, int i, int j, int k) {
-        System.out.println("" + i + ", " + j + ", " + k);
         // Base Case
         if (i == jobs.length) {
             // only allowed to choose from i onwards
-            int compromise = 0;
-            for (int jobIndex = k + 1; jobIndex < i ; jobIndex++) {
-                compromise += jobs[jobIndex].payment();
-            }
-            return Math.max(getProfit(cost, jobs, j, k, i) + compromise, 0) ;
+            int compensate = getCompensate(i, k, jobs);
+            return Math.max(getProfit(cost, jobs, j, k, i) + compensate, 0) ;
         } else {
             // take i or not based on some logic
             // first check j start and k end if it exceeds maxShiftLength
@@ -115,27 +111,21 @@ public class Recursive {
                     // no overlap
                     if (jobs[i].end() - jobs[j].start() + 1 > maxShiftLength) {
                         // newShift
-                        int compromise = 0;
-                        for (int jobIndex = k + 1; jobIndex < i ; jobIndex++) {
-                            compromise += jobs[jobIndex].payment();
-                        }
+                        int compensate = getCompensate(i, k, jobs);
                         return getProfit(cost, jobs, j, k, i) +
                                 maximumProfitRecursive(cost, minShiftBreak,
                                         maxShiftLength, jobs, nextJob,
-                                        jobs.length, jobs.length) + compromise;
+                                        jobs.length, jobs.length) + compensate;
                     } else {
                         // max(take, newShift, skip)
                         int take = maximumProfitRecursive(cost,
                                 minShiftBreak, maxShiftLength, jobs,
                                 i + 1, j, i);
-                        int compromise = 0;
-                        for (int jobIndex = k + 1; jobIndex < i ; jobIndex++) {
-                            compromise += jobs[jobIndex].payment();
-                        }
+                        int compensate = getCompensate(i, k, jobs);
                         int newShift = getProfit(cost, jobs, j, k, i) +
                                 maximumProfitRecursive(cost, minShiftBreak,
                                         maxShiftLength, jobs, nextJob,
-                                        jobs.length, jobs.length) + compromise;
+                                        jobs.length, jobs.length) + compensate;
                         int skip = maximumProfitRecursive(cost,
                                 minShiftBreak, maxShiftLength, jobs,
                                 i + 1, j, k) - jobs[i].payment();
@@ -145,27 +135,21 @@ public class Recursive {
                     // overlap
                     if (jobs[i].end() - jobs[j].start() + 1 > maxShiftLength) {
                         // newShift
-                        int compromise = 0;
-                        for (int jobIndex = k + 1; jobIndex < i ; jobIndex++) {
-                            compromise += jobs[jobIndex].payment();
-                        }
+                        int compensate = getCompensate(i, k, jobs);
                         return getProfit(cost, jobs, j, k, i) +
                                 maximumProfitRecursive(cost,
                                 minShiftBreak, maxShiftLength, jobs,
-                                        nextJob, jobs.length, jobs.length) + compromise;
+                                        nextJob, jobs.length, jobs.length) + compensate;
                     } else {
                         // max(skip, newShift)
                         int skip = maximumProfitRecursive(cost,
                                 minShiftBreak, maxShiftLength, jobs,
                                 i + 1 , j, k) - jobs[i].payment();
-                        int compromise = 0;
-                        for (int jobIndex = k + 1; jobIndex < i ; jobIndex++) {
-                            compromise += jobs[jobIndex].payment();
-                        }
+                        int compensate = getCompensate(i, k, jobs);
                         int newShift = getProfit(cost, jobs, j, k, i) +
                                 maximumProfitRecursive(cost, minShiftBreak,
                                         maxShiftLength, jobs, nextJob,
-                                        jobs.length, jobs.length) + compromise;
+                                        jobs.length, jobs.length) + compensate;
                         return Math.max(skip, newShift);
                     }
                 }
@@ -210,5 +194,22 @@ public class Recursive {
             }
         }
         return jobs.length;
+    }
+
+    /**
+     * return compensate for ending a shift by adding up the deducted jobs'
+     * payment from k+1 to i. The reason is there could be a "skip" before
+     * and the value had been deducted from it so we need compensation.
+     * @param i to i (not inclusive)
+     * @param k from k + 1
+     * @param jobs jobs
+     * @return compensation
+     */
+    private static int getCompensate(int i, int k, Job[] jobs) {
+        int compensate = 0;
+        for (int jobIndex = k + 1; jobIndex < i ; jobIndex++) {
+            compensate += jobs[jobIndex].payment();
+        }
+        return compensate;
     }
 }
